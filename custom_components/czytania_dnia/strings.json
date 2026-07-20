@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Czytania dnia",
+        "description": "Integracja pobierająca czytania liturgiczne ze strony mateusz.pl"
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Integracja Czytania dnia może być zainstalowana tylko raz."
+    }
+  }
+}
