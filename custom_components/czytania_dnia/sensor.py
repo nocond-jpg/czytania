@@ -14,7 +14,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 
 class CzytaniaDniaSensor(CoordinatorEntity, SensorEntity):
-    """Stan = data czytań, atrybuty = treść poszczególnych czytań."""
+    """Stan = data czytań, atrybuty = treść poszczególnych czytań z syglami."""
 
     _attr_name = "Czytania dnia"
     _attr_icon = "mdi:book-cross"
@@ -31,7 +31,19 @@ class CzytaniaDniaSensor(CoordinatorEntity, SensorEntity):
         data = self.coordinator.data or {}
         readings = data.get("readings", [])
         attrs = {"liczba_czytan": len(readings)}
+        
         for reading in readings:
-            key = reading["label"].lower().replace(" ", "_")
-            attrs[key] = reading["text"]
+            label = reading["label"]
+            text = reading["text"]
+            sigla = reading.get("sigla", "")
+            
+            # Klucz atrybutu (np. "pierwsze_czytanie", "psalm")
+            key = label.lower().replace(" ", "_")
+            
+            # Zwróć tekst ze syglą
+            attrs[key] = text
+            
+            # Dodaj też sygłę jako osobny atrybut
+            attrs[f"sigla_{key}"] = sigla
+        
         return attrs

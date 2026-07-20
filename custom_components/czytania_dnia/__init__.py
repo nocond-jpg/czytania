@@ -47,13 +47,21 @@ def _parse_html(raw: bytes) -> dict:
 
     # tekst jest podzielony odnosnikami biblijnymi w nawiasach, np. (Mdr 12,13-19)
     parts = re.split(r"\(([^)]{3,60})\)", section)
-    readings: list[str] = []
+    readings: list[dict] = []
+    
     for i in range(1, len(parts), 2):
+        sigla = parts[i] if i < len(parts) else ""  # Źródło np. "Ps 23,1"
         txt = parts[i + 1] if i + 1 < len(parts) else ""
-        txt = re.sub(r"\n+", " ", txt)
-        txt = re.sub(r"\s{2,}", " ", txt).strip()
+        
+        # Zachowaj wiersze - zamień wielokrotne spacje/taby na spacje, ale ZA BARDZO nie czyszcz newlines
+        txt = re.sub(r"[ \t]+", " ", txt)  # Zamień wielokrotne spacje/taby na jedną spację
+        txt = re.sub(r"\n\s*\n", "\n", txt)  # Usuń puste linie (podwójne newline)
+        txt = txt.strip()
+        
         if txt:
-            readings.append(txt)
+            # Dodaj sygłę na początku
+            formatted_text = f"({sigla})\n{txt}"
+            readings.append({"sigla": sigla, "text": formatted_text})
 
     count = len(readings)
     if count == 4:
@@ -65,7 +73,8 @@ def _parse_html(raw: bytes) -> dict:
 
     return {
         "date": datetime.date.today().isoformat(),
-        "readings": [{"label": label, "text": text} for label, text in zip(labels, readings)],
+        "readings": [{"label": label, "text": text["text"], "sigla": text["sigla"]} 
+                     for label, text in zip(labels, readings)],
     }
 
 
